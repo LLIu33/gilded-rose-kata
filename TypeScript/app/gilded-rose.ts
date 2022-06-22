@@ -10,6 +10,12 @@ export class Item {
     }
 }
 
+export const ItemTypes = {
+    "AGED_BRIE": 'Aged Brie',
+    "BACKSTAGE_PASSES": 'Backstage passes to a TAFKAL80ETC concert',
+    "SULFURAS": 'Sulfuras, Hand of Ragnaros'
+}
+
 export class GildedRose {
     items: Array<Item>;
 
@@ -17,53 +23,76 @@ export class GildedRose {
         this.items = items;
     }
 
-    updateQuality() {
-        for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                if (this.items[i].quality > 0) {
-                    if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                        this.items[i].quality = this.items[i].quality - 1
-                    }
-                }
-            } else {
-                if (this.items[i].quality < 50) {
-                    this.items[i].quality = this.items[i].quality + 1
-                    if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].sellIn < 11) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                        if (this.items[i].sellIn < 6) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                    }
-                }
-            }
-            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].sellIn = this.items[i].sellIn - 1;
-            }
-            if (this.items[i].sellIn < 0) {
-                if (this.items[i].name != 'Aged Brie') {
-                    if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].quality > 0) {
-                            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                                this.items[i].quality = this.items[i].quality - 1
-                            }
-                        }
-                    } else {
-                        this.items[i].quality = this.items[i].quality - this.items[i].quality
-                    }
-                } else {
-                    if (this.items[i].quality < 50) {
-                        this.items[i].quality = this.items[i].quality + 1
-                    }
-                }
+    updateBasic(item) { 
+        if (item.quality > 0) {
+            item.quality = item.quality - 1;
+        }
+        item.sellIn = item.sellIn - 1;
+
+        if (item.sellIn < 0) {
+            if (item.quality > 0) {
+                item.quality = item.quality - 1;
             }
         }
 
+        return item;
+    }
+
+    updateAgedBrie(item) { 
+        if (item.quality < 50) {
+            item.quality = item.quality + 1;
+        }
+
+        item.sellIn = item.sellIn - 1;
+
+        if (item.sellIn < 0 && item.quality < 50) {
+            item.quality = item.quality + 1;
+        }
+
+        return item;
+    }
+
+    updateBackstagePasses(item) { 
+        if (item.quality < 50) {
+            item.quality = item.quality + 1
+            if (item.sellIn < 11) {
+                item.quality = item.quality + 1
+            }
+            if (item.sellIn < 6) {
+                item.quality = item.quality + 1
+            }
+        }
+
+        item.sellIn = item.sellIn - 1;
+
+        if (item.sellIn < 0) {
+            item.quality = item.quality - item.quality;
+        }
+
+        return item;
+    }
+
+    updateSulfuras(item) { 
+        return item;
+    }
+
+    updateQuality() {
+        for (const item of this.items) {
+            switch(item.name) {
+                case ItemTypes.AGED_BRIE:
+                    this.updateAgedBrie(item);
+                    continue;
+                case ItemTypes.SULFURAS:
+                    this.updateSulfuras(item);
+                    continue;
+                case ItemTypes.BACKSTAGE_PASSES:
+                    this.updateBackstagePasses(item);
+                    continue;
+                default:
+                    this.updateBasic(item);
+                    continue;
+            }
+        }
         return this.items;
     }
 }
