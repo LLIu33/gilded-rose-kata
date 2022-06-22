@@ -10,10 +10,13 @@ export class Item {
     }
 }
 
+const SULFARAS_QUALITY = 80;
+
 export const ItemTypes = {
-    "AGED_BRIE": 'Aged Brie',
-    "BACKSTAGE_PASSES": 'Backstage passes to a TAFKAL80ETC concert',
-    "SULFURAS": 'Sulfuras, Hand of Ragnaros'
+    'AGED_BRIE': 'Aged Brie',
+    'BACKSTAGE_PASSES': 'Backstage passes to a TAFKAL80ETC concert',
+    'SULFURAS': 'Sulfuras, Hand of Ragnaros',
+    'CONJURED': 'Conjured'
 }
 
 export class GildedRose {
@@ -73,6 +76,24 @@ export class GildedRose {
     }
 
     updateSulfuras(item) { 
+        item.quality = SULFARAS_QUALITY
+        return item;
+    }
+
+    updateConjured(item) { 
+        if (item.quality > 0) {
+            item.quality = item.quality - 2;
+        }
+        item.sellIn = item.sellIn - 1;
+
+        if (item.sellIn < 0) {
+            if (item.quality > 0) {
+                item.quality = item.quality - 2;
+            }
+        }
+
+        item.quality = (item.quality < 0) ? 0 : item.quality;
+
         return item;
     }
 
@@ -87,6 +108,9 @@ export class GildedRose {
                     continue;
                 case ItemTypes.BACKSTAGE_PASSES:
                     this.updateBackstagePasses(item);
+                    continue;
+                case ItemTypes.CONJURED:
+                    this.updateConjured(item);
                     continue;
                 default:
                     this.updateBasic(item);
